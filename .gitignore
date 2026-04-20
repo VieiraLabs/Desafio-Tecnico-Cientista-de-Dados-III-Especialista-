@@ -1,0 +1,22 @@
+# Diretórios e Ambientes Virtuais
+venv/
+.venv/
+env/
+__pycache__/
+*.pyc
+
+# Variaveis de Ambiente e Chaves API (MUITO IMPORTANTE)
+.env
+
+# Arquivos de Sistema Oculto
+.DS_Store
+.gemini/
+
+# Pastas de IDE e Jupyter
+.vscode/
+.idea/
+.ipynb_checkpoints/
+
+# Modelos binários e logs se não quiser enviar o modelo pronto
+# (No caso vamos deixar comentado pois você pode querer subir o joblib treinado)
+# models/*.joblib
