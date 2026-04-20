@@ -1,256 +1,82 @@
-# Desafio Técnico — Cientista de Dados III (Especialista)
+# Neural HR & Retention: TOTVS Data Science Challenge
 
-## Contexto
+Este projeto é uma solução fim-a-ponta de **People Analytics**, desenvolvida para o Desafio Técnico Cientista de Dados III (Especialista) da TOTVS. O sistema prevê o risco de rescisão (Churn) usando modelos em árvore, detalha o **motivo** com Valores Shapley e sugere ações de retenção via Agente ReAct Inteligente consumindo APIs Groq (LLaMA-3).
 
-Este desafio simula um cenário real de desenvolvimento de soluções de dados e inteligência artificial aplicadas ao contexto de Recursos Humanos.
+---
 
-## Objetivo
+## 🌟 Principais Features Entregues
 
-Construir uma aplicação de People Analytics com IA que seja capaz de:
+1. **Dashboard Premium Streamlit**: Interface *Dark Mode* ultra responsiva com painéis modulares e métricas analíticas da equipe/pessoas.
+2. **Backend Scalável FastAPI**: API separada encapsulando inferência ML (XGBoost/RF), cálculos do SHAP Tree Explainer e Orquestrador IA *LangGraph*.
+3. **Pilar Inteligente LLM / LangChain**: Prompters rígidos para respostas JSON e Chat Assistant nativo cruzando histórico de banco e features importances.
+4. **Governança/MLOps Documentada**: Diretórios dedicados (`docs/`) endereçando a mentalidade Sr/Lead da liderança corporativa (Mentoria MLOps e Pipeline).
 
-1. prever risco de saída de colaboradores
-2. gerar insights automatizados com apoio de LLM
-3. permitir interação por meio de um agente
-4. demonstrar organização técnica, visão arquitetural e capacidade de liderança
+---
 
-## Dados
+## 📂 Visão Rápida da Arquitetura
+Para maiores detalhes leia o diagrama de sistema [exposto na documentação](docs/arquitetura.md).
 
-Utilize dados públicos.
+```bash
+/src
+ ├── ml/             # Pré-processamento, Treino (XGBoost) e SHAP Explainer
+ ├── llm/            # Integração Pydantic Parser + LangChain (Groq LLaMA-3)
+ ├── api/            # FastAPI Schemas, Rotas Rest e Endpoint Manager
+ └── agent/          # Orquestrador React Agent LangGraph com Tools Injetadas
+/ui
+ └── app.py          # Dashboard Premium Visual
+```
 
-Sugestões:
+---
 
-- IBM HR Analytics Employee Attrition Dataset
-- outro dataset público compatível com o problema proposto
+## 🚀 Como Rodar o Projeto
 
-Caso opte por outro dataset, explique a escolha no README.
+Você tem duas vias de execução: via **Docker** (recomendado para revisar o projeto final entregue) ou de forma **Local** nativa.
 
-## Escopo do Projeto
+### Premissa Obrigatória: Chave de API
+Obtenha uma chave gratuita da [Groq Cloud (Console)](https://console.groq.com/keys). Renomeie o arquivo `.env.example` para `.env` e insira sua chave lá:
 
-### 1. Machine Learning
+```env
+GROQ_API_KEY=gsk_suachaveaqui
+```
 
-Desenvolver um modelo preditivo de churn de colaboradores.
+### Opção 1: Via Docker (Docker Compose) - ⭐ Mais Rápido
 
-#### Requisitos mínimos
+Na raiz do projeto rode o comando único:
+```bash
+docker-compose up --build
+```
+> O Docker efetuará os builds, instalará módulos Python e executará o script de ML. Ao subir, os serviços estão disponíveis em:
+> - **Frontend Web (Dashboard):** `http://localhost:8501`
+> - **API e Documentação Swagger:** `http://localhost:8000/api/docs`
 
-- definir claramente a variável alvo
-- realizar análise exploratória dos dados
-- fazer tratamento e preparação dos dados
-- realizar feature engineering relevante
-- treinar pelo menos dois modelos diferentes
-- comparar os resultados
-- justificar a escolha do modelo final
+### Opção 2: Local (Ambiente Python Nativo)
 
-#### Métricas esperadas
+```bash
+# 1. Crie e ative um ambiente virtual
+python -m venv venv
+.\venv\Scripts\Activate   # (Windows)
+# source venv/bin/activate # (Unix)
 
-Utilize métricas adequadas ao problema, como por exemplo:
+# 2. Dependências
+pip install -r requirements.txt
 
-- ROC-AUC
-- Precision
-- Recall
-- F1-score
+# 3. Baixe e Execute o Pipeline de ML Inicial (Gerar os Joblib Models)
+python -m src.ml.train
 
-#### Explicabilidade
+# 4. Levante em Terminais/Bash's Adjacentes a API e o Streamlit
+uvicorn src.api.main:app --host 0.0.0.0 --port 8000
+streamlit run ui/app.py
+```
 
-Apresente a explicabilidade do modelo por meio de uma ou mais abordagens, como:
+---
 
-- feature importance
-- SHAP
-- análise dos principais fatores associados ao risco de saída
+## 📖 Documentação de Negócio (Desafio Específico)
 
-O objetivo não é apenas prever, mas também explicar de forma clara os fatores que influenciam o resultado.
+A avaliação solicitou textos estratégicos. Por favor consulte a leitura das sub-páginas contidas em `/docs/` para a avaliação da mentalidade e maturidade.
 
-### 2. LLM
+- [Liderança, Mentoria e Time](docs/lideranca_tecnica.md)
+- [Julgamento de Custo e Decisões de ML](docs/decisoes_tecnicas.md)
+- [Mermaid Pipeline Arquitetural](docs/arquitetura.md)
 
-Implementar uma camada de inteligência com LLM para geração de insights a partir dos resultados do modelo.
-
-O sistema deve ser capaz de responder perguntas como:
-
-- por que este colaborador apresenta alto risco de saída?
-- quais fatores mais contribuíram para esse risco?
-- quais ações podem ser sugeridas para retenção?
-
-#### Requisitos mínimos
-
-- uso de prompt estruturado
-- utilização de contexto vindo do modelo preditivo
-- resposta organizada e consistente
-- output estruturado em JSON ou formato equivalente
-
-#### Exemplo de saída esperada
-
-    {
-      "risk_level": "high",
-      "main_factors": ["baixo salário", "tempo sem promoção"],
-      "recommended_actions": ["revisão salarial", "plano de carreira"]
-    }
-
-Não é esperado apenas um chat genérico. O LLM deve estar conectado ao problema, aos dados e à lógica do sistema.
-
-### 3. Orquestração / Agent
-
-Construir um fluxo simples de agente que orquestre as etapas da solução.
-
-Esse agente deve ser capaz de:
-
-- receber uma pergunta do usuário
-- decidir quais ações precisam ser executadas
-- consultar dados necessários
-- acionar o modelo preditivo quando necessário
-- gerar a resposta final com apoio do LLM
-
-#### Exemplos de fluxo
-
-Exemplo 1:
-
-- o usuário pergunta qual colaborador apresenta maior risco
-- o agente consulta os dados
-- o agente executa ou consulta o resultado do modelo
-- o agente responde com apoio do LLM
-
-Exemplo 2:
-
-- o usuário pergunta por que um colaborador específico está em risco
-- o agente recupera features e score
-- o agente monta o contexto
-- o LLM gera a explicação final
-
-#### Tecnologias sugeridas
-
-Você pode utilizar uma das abordagens abaixo:
-
-- OpenAI Agents SDK
-- LangChain
-- LlamaIndex
-- implementação própria
-
-O foco principal é demonstrar capacidade de orquestração, desenho lógico e clareza técnica.
-
-### 4. Interface (Frontend) (Ponto Extra - Não é obrigatório)
-
-Construir uma interface simples para interação com o sistema.
-
-#### Requisitos mínimos
-
-- visualização do risco de colaboradores
-- listagem ou consulta de colaboradores
-- tela ou área para interação com o agente
-
-#### Tecnologias sugeridas
-
-- Next.js com TypeScript
-- Streamlit para uma versão simplificada
-
-#### Diferenciais
-
-Serão considerados diferenciais positivos:
-
-- gráficos e indicadores
-- filtros
-- navegação clara
-- boa experiência de uso
-- organização visual coerente com um produto real
-
-O frontend não precisa ser sofisticado, mas deve permitir demonstrar a aplicação funcionando de ponta a ponta.
-
-### 5. Arquitetura
-
-Descrever a arquitetura da solução de forma clara.
-
-Essa descrição pode ser feita por meio de:
-
-- diagrama
-- documento em Markdown
-- combinação dos dois
-
-#### Espera-se que a arquitetura contemple
-
-- camada de dados
-- processamento e preparação
-- treinamento do modelo
-- serviço de inferência
-- camada de agente
-- integração com LLM
-- interface do usuário
-
-### 6. Backend / Produção
-
-Não é obrigatório ter uma solução completa em produção, mas é importante demonstrar maturidade de engenharia.
-
-#### Diferenciais recomendados
-
-- API para inferência, por exemplo com FastAPI
-- organização modular do projeto
-- separação entre treinamento, inferência e interface
-- uso de Docker
-- versionamento de artefatos
-- preocupação com reprodutibilidade
-
-### 7. Liderança Técnica e Mentoria
-
-Além da entrega técnica, o candidato deve responder em um documento separado como conduziria tecnicamente a evolução dessa iniciativa dentro de um time.
-
-#### O documento deve responder aos seguintes pontos
-
-##### a) Estrutura do time
-
-Explique como você organizaria o time para desenvolver e evoluir essa solução.
-
-Considere, por exemplo:
-
-- Cientista de Dados I
-- Cientista de Dados II
-- Engenheiro de Dados ou de Machine Learning
-- QA
-- Produto
-- Design, se fizer sentido
-
-##### b) Mentoria
-
-Explique como você apoiaria o desenvolvimento técnico de profissionais mais juniores.
-
-Esperam-se exemplos práticos, como:
-
-- code review
-- pair programming
-- definição de trilhas de desenvolvimento
-- acompanhamento técnico
-- sessões de estudo
-- definição de boas práticas
-
-##### c) Qualidade e evolução contínua
-
-Explique como garantiria qualidade e sustentabilidade da solução ao longo do tempo.
-
-Considere pontos como:
-
-- testes
-- monitoramento
-- controle de drift
-- documentação
-- governança
-- critérios de evolução técnica
-
-## Entregáveis
-
-A entrega deve conter, no mínimo:
-
-- repositório com o código-fonte
-- README com instruções de execução
-- README das decisões técnicas
-- descrição da arquitetura
-
-## Observações
-
-- evitar uma solução restrita apenas a notebook
-- evitar uso superficial de LLM, sem contexto ou sem integração real com o problema
-- priorizar clareza, consistência e tomada de decisão
-- a solução não precisa estar perfeita visualmente, mas deve demonstrar maturidade técnica
-- mais importante do que complexidade é a capacidade de justificar decisões
-
-## Dicas
-
-- pense na solução como produto, não apenas como exercício técnico
-- priorize interpretabilidade além de performance
-- use o LLM como camada de explicação e apoio à decisão
-- demonstre organização de código e visão arquitetural
-- mostre como você estruturaria o trabalho para evoluir com um time, e não apenas como faria sozinho
+---
+ *Construído e Arquitetado para escalonar impacto real (Developer e User Experience).* 

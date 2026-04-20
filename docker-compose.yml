@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  # === SETUP INICIAL (ML PIPELINE) ===
+  # Treina e salva o modelo de RandomForest / XGBoost antes das web-apis startarem
+  ml-trainer:
+    build: .
+    container_name: totvs-ml-trainer
+    volumes:
+      - .:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+    command: python -m src.ml.train
+    profiles: ["setup"] # Comando isolado para não reiniciar sempre. Rode: docker-compose --profile setup up
+
+  # === BACKEND (FASTAPI) ===
+  api:
+    build: .
+    container_name: totvs-fastapi
+    restart: always
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    environment:
+      - GROQ_API_KEY=${GROQ_API_KEY}
+    command: uvicorn src.api.main:app --host 0.0.0.0 --port 8000 --workers 2
+    depends_on:
+      # O backend idealmente subiria depois do ML rodar, o compose permite health checks complexos.
+      # Assumimos que as instâncias rolam concorrentemente no deploy final
+      - ml-trainer
+
+  # === FRONTEND WEB (STREAMLIT) ===
+  ui:
+    build: .
+    container_name: totvs-streamlit
+    restart: always
+    ports:
+      - "8501:8501"
+    volumes:
+      - .:/app
+    depends_on:
+      - api
+    command: streamlit run ui/app.py --server.port 8501 --server.address 0.0.0.0
