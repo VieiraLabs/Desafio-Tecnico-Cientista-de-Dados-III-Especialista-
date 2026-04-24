@@ -10,7 +10,7 @@ from typing import Dict, Any, List
 
 from src.config import TARGET_COLUMN
 from src.ml.predict import get_employee_by_id, predict_single_employee
-from src.ml.explainability import explain_single_prediction_shap
+from src.ml.explainability import explain_single_prediction_shap, get_feature_importance_ranking
 from src.ml.preprocessing import load_data
 
 @tool
@@ -94,10 +94,74 @@ def get_department_stats_tool(department: str) -> str:
     except Exception as e:
         return str(e)
 
+@tool
+def get_demographic_churn_stats_tool(query_type: str = "general") -> str:
+    """Busca estatísticas demográficas sobre evasão (churn). Útil para responder perguntas sobre idade média de evasão, sexo com maior saída, e outros dados demográficos de quem saiu da empresa."""
+    try:
+        df = load_data()
+        churned = df[df[TARGET_COLUMN] == 'Yes']
+        
+        # Sexo com maior saída
+        if 'Gender' in churned.columns:
+            gender_counts = churned['Gender'].value_counts()
+            top_gender = gender_counts.idxmax()
+            top_gender_count = gender_counts.max()
+            # Traduzir para pt-br caso seja Male/Female
+            top_gender_pt = "Masculino" if top_gender == "Male" else "Feminino" if top_gender == "Female" else top_gender
+            gender_info = f"O sexo com maior número de saídas é {top_gender_pt} ({top_gender_count} saídas)."
+        else:
+            gender_info = "Informação de sexo não disponível no dataset."
+            
+        # Idade média de evasão
+        if 'Age' in churned.columns:
+            avg_age_churn = churned['Age'].mean()
+            age_info = f"A idade média de evasão (pessoas que saíram) é de {avg_age_churn:.1f} anos."
+        else:
+            age_info = "Informação de idade não disponível no dataset."
+            
+        # Estado civil com maior evasão
+        if 'MaritalStatus' in churned.columns:
+            marital_counts = churned['MaritalStatus'].value_counts()
+            top_marital = marital_counts.idxmax()
+            top_marital_count = marital_counts.max()
+            
+            # Traduzir MaritalStatus
+            marital_map = {"Single": "Solteiro(a)", "Married": "Casado(a)", "Divorced": "Divorciado(a)"}
+            top_marital_pt = marital_map.get(top_marital, top_marital)
+            
+            # Pegar estatísticas extras para explicar o 'por quê' (menor idade, menor renda, etc)
+            df_marital = df[df['MaritalStatus'] == top_marital]
+            avg_age_marital = df_marital['Age'].mean() if 'Age' in df_marital else 0
+            avg_income_marital = df_marital['MonthlyIncome'].mean() if 'MonthlyIncome' in df_marital else 0
+            
+            marital_info = (f"O estado civil com maior evasão é {top_marital_pt} ({top_marital_count} saídas). "
+                            f"Motivos prováveis (contexto): este grupo costuma ser mais jovem (idade média {avg_age_marital:.1f} anos) "
+                            f"e possuir menor vínculo, além de uma renda média de ${avg_income_marital:.2f}, facilitando a troca de empregos.")
+        else:
+            marital_info = "Informação de estado civil não disponível no dataset."
+            
+        return f"Estatísticas Demográficas de Churn:\n- {gender_info}\n- {age_info}\n- {marital_info}"
+    except Exception as e:
+        return f"Erro ao obter estatísticas demográficas: {str(e)}"
+
+@tool
+def get_global_churn_reasons_tool(query_type: str = "general") -> str:
+    """Retorna os maiores motivos/fatores globais de saída (churn) na empresa, com base no modelo de Machine Learning treinado (Feature Importance). Útil para responder 'quais os principais motivos de saída' ou 'o que mais impacta a evasão'."""
+    try:
+        top_factors = get_feature_importance_ranking(top_n=5)
+        res = "Os 5 maiores motivos (variáveis) que impactam a saída de funcionários na empresa são:\n"
+        for i, f in enumerate(top_factors):
+            res += f"{i+1}º - {f['feature']} (Relevância/Peso: {f['importance']})\n"
+        return res
+    except Exception as e:
+        return f"Erro ao consultar os maiores motivos de saída: {str(e)}"
+
 # Lista consolidada de ferramentas para a engine principal
 HR_TOOLS = [
     search_employee_tool,
     calculate_churn_risk_tool,
     explain_churn_factors_tool,
-    get_department_stats_tool
+    get_department_stats_tool,
+    get_demographic_churn_stats_tool,
+    get_global_churn_reasons_tool
 ]
