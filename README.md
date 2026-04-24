@@ -73,6 +73,17 @@ streamlit run ui/app.py
 
 ---
 
+## 💻 Guia Rápido de Uso (Navegação no Sistema)
+
+Após iniciar o sistema (`localhost:8501`), você encontrará uma barra lateral de navegação com as seguintes ferramentas de trabalho:
+
+- **Visão Geral:** É o seu *Cockpit* inicial. Aqui você tem um dashboard rico com gráficos interativos e pode filtrar o *turnover* (churn), retenção e salários por Departamento em tempo real.
+- **Dossiê do Colaborador:** O motor de Machine Learning. Digite a matrícula (ID) de um funcionário (ex: `1`, `2`, `14`) para ler seu perfil completo, acionar a predição visual de Risco de Evasão (via XGBoost/Random Forest) e receber os insights (textos gerados via LLM e SHAP Values listando os fatores que empurram o funcionário pra fora).
+- **Base de Dados HR:** Visão tabular pura dos dados do dataset (IBM HR), ideal para consultas e *double-check* dos dados lidos.
+- **Agente IA:** O Chatbot ReAct. Um assistente autônomo com ferramentas matemáticas. Você pode bater papo perguntando: *"Por que o colaborador 1 apresenta alto risco?"*, *"Qual o estado civil com maior índice de saídas?"*, ou *"Quais os top 5 fatores que mais geram demissão no geral?"*.
+
+---
+
 ## 📖 Documentação de Negócio (Desafio Específico)
 
 A avaliação solicitou textos estratégicos. Por favor consulte a leitura das sub-páginas contidas em `/docs/` para a avaliação da mentalidade e maturidade.
