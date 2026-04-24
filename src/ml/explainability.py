@@ -53,6 +53,9 @@ def explain_single_prediction_shap(employee_data_dict: Dict[str, Any], top_facto
         if isinstance(shap_values, list):
             # Classe 1 é Churn (Sim)
             sv = shap_values[1][0] 
+        elif len(shap_values.shape) == 3:
+            # Shape (n_samples, n_features, n_classes) - extrair classe 1
+            sv = shap_values[0, :, 1]
         else:
             sv = shap_values[0]
             

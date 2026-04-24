@@ -61,7 +61,7 @@ def run_agent_query(user_query: str, thread_id: str = "default_session_1") -> st
         return response_state["messages"][-1].content
     except Exception as e:
         print(f"Erro rodando agente LangGraph: {e}")
-        return "Desculpe, ocorreu um problema no orquestrador IA e não consegui completar a sua ação."
+        return f"Desculpe, ocorreu um problema no orquestrador IA: {str(e)}"
 
 if __name__ == "__main__":
     # Teste rápido executado como modulo (Mock Test)
