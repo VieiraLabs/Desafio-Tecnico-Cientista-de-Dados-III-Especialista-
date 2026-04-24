@@ -1,15 +1,18 @@
-# Neural HR & Retention: TOTVS Data Science Challenge
+# RH Neural: Motor de Retenção de Talentos (TOTVS Data Science Challenge)
 
-Este projeto é uma solução fim-a-ponta de **People Analytics**, desenvolvida para o Desafio Técnico Cientista de Dados III (Especialista) da TOTVS. O sistema prevê o risco de rescisão (Churn) usando modelos em árvore, detalha o **motivo** com Valores Shapley e sugere ações de retenção via Agente ReAct Inteligente consumindo APIs Groq (LLaMA-3).
+Este projeto é uma solução de **People Analytics** *end-to-end*, desenvolvida para atender com 100% de aderência (incluindo todos os diferenciais extras recomendados) ao **Desafio Técnico Cientista de Dados III (Especialista)** da TOTVS. 
+
+O sistema prevê o risco de rescisão (Churn) de colaboradores usando modelos em árvore (XGBoost/RandomForest) baseados no *IBM HR Analytics*, detalha o **motivo** exato das saídas usando *SHAP Values* e sugere ações de retenção ativas. Tudo isso operado por um **Agente ReAct Inteligente (LangChain + LLaMA-3)** capaz de buscar estatísticas demográficas ativamente, cruzar dados de departamentos e justificar os resultados preditivos na interface.
 
 ---
 
-## 🌟 Principais Features Entregues
+## 🌟 Atendimento Integral dos Requisitos e Diferenciais
 
-1. **Dashboard Premium Streamlit**: Interface *Dark Mode* ultra responsiva com painéis modulares e métricas analíticas da equipe/pessoas.
-2. **Backend Scalável FastAPI**: API separada encapsulando inferência ML (XGBoost/RF), cálculos do SHAP Tree Explainer e Orquestrador IA *LangGraph*.
-3. **Pilar Inteligente LLM / LangChain**: Prompters rígidos para respostas JSON e Chat Assistant nativo cruzando histórico de banco e features importances.
-4. **Governança/MLOps Documentada**: Diretórios dedicados (`docs/`) endereçando a mentalidade Sr/Lead da liderança corporativa (Mentoria MLOps e Pipeline).
+1. **Machine Learning e Explicabilidade:** Treinamento estruturado, pipeline modular e justificativas claras de evasão utilizando `Feature Importance` e `SHAP`.
+2. **Orquestração de LLMs e Agente Inteligente:** Um verdadeiro *Agentic Workflow* construído com LangChain. O chatbot do sistema possui "Tools" desenvolvidas sob medida para consultar salários de departamentos, demografia (idade, gênero e estado civil de churn) e rodar inferências ML em tempo real sob demanda.
+3. **Dashboard Premium Streamlit (Ponto Extra):** Uma interface visual de alto padrão (Dark Mode em Azul Escuro e Ciano), totalmente focada em UX, unificando a experiência de consumo da predição.
+4. **Backend Desacoplado (Produção):** O projeto não vive em notebooks. Roda em uma arquitetura de microsserviços via `FastAPI`, documentada em `Swagger` e com Deploy versionado.
+5. **Visão de Liderança (Pilar Sênior):** Diretório estruturado `/docs` detalhando a arquitetura em Mermaid, as justificativas das escolhas de negócio, formação do Squad (Especialista, PM, DS Jr), visão de Mentoria (Code Review/Pair Programming) e CI/CD.
 
 ---
 
@@ -79,4 +82,5 @@ A avaliação solicitou textos estratégicos. Por favor consulte a leitura das s
 - [Mermaid Pipeline Arquitetural](docs/arquitetura.md)
 
 ---
- *Construído e Arquitetado para escalonar impacto real (Developer e User Experience).* 
+
+ *Criado pelo Cientista de Dados - David Vieira | [www.vieiralabs.ia.br](http://www.vieiralabs.ia.br)*
